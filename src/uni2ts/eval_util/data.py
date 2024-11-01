@@ -7,7 +7,7 @@ from gluonts.dataset.split import TestData, split
 
 from uni2ts.data.builder.lotsa_v1.gluonts import get_dataset
 
-from ._hf_dataset import HFDataset
+from ._hf_dataset import HFDataset, HFDatasetM
 from ._lsf_dataset import LSFDataset
 from ._pf_dataset import generate_pf_dataset, pf_load_func_map
 
@@ -156,5 +156,34 @@ def get_custom_eval_dataset(
         target_dim=hf_dataset.target_dim,
         prediction_length=prediction_length,
         split="test",
+    )
+    return test_data, metadata
+
+
+def get_custom_eval_dataset_m(
+    dataset_name: str,
+    offset: int,
+    windows: int,
+    distance: int,
+    prediction_length: int,
+    mode: None = None,
+) -> tuple[TestData, MetaData]:
+    hf_dataset = HFDatasetM(dataset_name)
+    dataset = _FileDataset(
+        hf_dataset, freq=hf_dataset.freq, one_dim_target=hf_dataset.target_dim == 1
+    )
+    _, test_template = split(dataset, offset=offset)
+    test_data = test_template.generate_instances(
+        prediction_length,
+        windows=windows,
+        distance=distance,
+    )
+    metadata = MetaData(
+        freq=hf_dataset.freq,
+        target_dim=hf_dataset.target_dim,
+        prediction_length=prediction_length,
+        split="test",
+        past_feat_dynamic_real_dim=hf_dataset.past_feat_dynamic_real_dim,
+        feat_dynamic_real_dim=hf_dataset.feat_dynamic_real_dim
     )
     return test_data, metadata
