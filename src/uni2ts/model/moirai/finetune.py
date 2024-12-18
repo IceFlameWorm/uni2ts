@@ -39,6 +39,7 @@ from uni2ts.module.position import (
 )
 from uni2ts.module.ts_embed import MultiInSizeLinear, MultiOutSizeLinear
 from uni2ts.optim import SchedulerType, get_scheduler
+from uni2ts.optim.lr_scheduler import TYPE_TO_SCHEDULER_FUNCTION
 from uni2ts.transform import (
     AddObservedMask,
     AddTimeIndex,
@@ -311,17 +312,23 @@ class MoiraiFinetune(L.LightningModule):
             betas=(self.hparams.beta1, self.hparams.beta2),
             eps=1e-6,
         )
-        scheduler = get_scheduler(
-            SchedulerType.COSINE_WITH_RESTARTS,
+        # scheduler = get_scheduler(
+        #     SchedulerType.COSINE_WITH_RESTARTS,
+        #     optimizer,
+        #     num_warmup_steps=self.hparams.num_warmup_steps,
+        #     num_training_steps=self.hparams.num_training_steps,
+        # )
+        scheduler = TYPE_TO_SCHEDULER_FUNCTION[SchedulerType.COSINE_WITH_RESTARTS](
             optimizer,
             num_warmup_steps=self.hparams.num_warmup_steps,
             num_training_steps=self.hparams.num_training_steps,
+            num_cycles=5
         )
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
                 "scheduler": scheduler,
-                "monitor": "train_loss",
+                "monitor": "val_loss",
                 "interval": "step",
             },
         }

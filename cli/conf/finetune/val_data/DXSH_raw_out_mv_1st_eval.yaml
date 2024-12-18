@@ -1,0 +1,9 @@
+_target_: uni2ts.data.builder.ConcatDatasetBuilder
+_args_:
+  _target_: uni2ts.data.builder.simple.generate_eval_builders
+  dataset: DXSH_raw_out_mv_1st_eval
+  offset: -45548
+  eval_length: 15000
+  prediction_lengths: [64]
+  context_lengths: [192]
+  patch_sizes: [64]
